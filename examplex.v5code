@@ -1,1 +1,56 @@
-{"title":"examplex","description":"Empty V5 C++ Project","icon":"USER921x.bmp","version":"20.06.2618","sdk":"20200618_17_00_00","language":"cpp","competition":false,"files":[{"name":"include/robot-config.h","type":"File","specialType":"device_config"},{"name":"include/vex.h","type":"File","specialType":""},{"name":"makefile","type":"File","specialType":""},{"name":"src/main.cpp","type":"File","specialType":""},{"name":"src/robot-config.cpp","type":"File","specialType":"device_config"},{"name":"vex/mkenv.mk","type":"File","specialType":""},{"name":"vex/mkrules.mk","type":"File","specialType":""},{"name":"include","type":"Directory"},{"name":"src","type":"Directory"},{"name":"vex","type":"Directory"}],"device":{"slot":1,"uid":"276-4810","options":{}},"isExpertMode":false,"isExpertModeRC":false,"isVexFileImport":false,"robotconfig":[{"port":[2],"name":"leftback","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1"},"triportSourcePort":22},{"port":[10],"name":"rightfront","customName":true,"deviceType":"Motor","setting":{"reversed":"true","fwd":"forward","rev":"reverse","gear":"ratio18_1"},"triportSourcePort":22},{"port":[6],"name":"rightback","customName":true,"deviceType":"Motor","setting":{"reversed":"true","fwd":"forward","rev":"reverse","gear":"ratio18_1"},"triportSourcePort":22},{"port":[9],"name":"leftfront","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1"},"triportSourcePort":22},{"port":[],"name":"Controller1","customName":false,"deviceType":"Controller","setting":{"left":"","leftDir":"false","right":"","rightDir":"false","upDown":"","upDownDir":"false","xB":"","xBDir":"false","drive":"none","id":"primary"},"triportSourcePort":22},{"port":[11],"name":"rightintake","customName":true,"deviceType":"Motor","setting":{"reversed":"true","fwd":"forward","rev":"reverse","gear":"ratio18_1"},"triportSourcePort":22},{"port":[12],"name":"leftintake","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1","id":"partner"},"triportSourcePort":22}],"neverUpdate":null}
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       victoriang                                                */
+/*    Created:      Tue Sep 29 2020                                           */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// leftback             motor         2               
+// rightfront           motor         10              
+// rightback            motor         6               
+// leftfront            motor         9               
+// Controller1          controller                    
+// rightintake          motor         11              
+// leftintake           motor         12              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+int main() 
+{
+  while (true)
+  {
+    double frontLeft = (double)(Controller1.Axis3.position(pct) + Controller1.Axis4.position(pct) + Controller1.Axis1.position(pct)) * .5;
+    double backLeft = (double)(Controller1.Axis3.position(pct) - Controller1.Axis4.position(pct) + Controller1.Axis1.position(pct)) * .5;
+    double frontRight = (double)(Controller1.Axis3.position(pct) - Controller1.Axis4.position(pct) - Controller1.Axis1.position(pct)) * .5;
+    double backRight = (double)(Controller1.Axis3.position(pct) + Controller1.Axis4.position(pct) - Controller1.Axis1.position(pct)) * .5;
+
+    leftfront.spin(fwd, frontLeft, velocityUnits::pct);
+    leftback.spin(fwd, backLeft, velocityUnits::pct);
+    rightfront.spin(fwd, frontRight,velocityUnits::pct);
+    rightback.spin(fwd, backRight, velocityUnits::pct);
+  
+    if(Controller1.ButtonY.pressing())
+    {
+      rightintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+      leftintake.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+    }
+    else if (Controller1.ButtonA.pressing())
+    {
+      rightintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+      leftintake.spin(vex::directionType::rev,100,vex::velocityUnits::pct);
+    }
+    else
+    {
+      rightintake.stop(vex::brakeType::hold);
+      leftintake.stop(vex::brakeType::hold);
+    }
+  } 
+}
