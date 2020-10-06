@@ -1,1 +1,108 @@
-{"title":"4610xvisensor-sweksha.v5code","description":"Empty V5 C++ Project","icon":"USER921x.bmp","version":"20.08.2714","sdk":"20191206_14_00_00","language":"cpp","competition":false,"files":[{"name":"include/robot-config.h","type":"File","specialType":"device_config"},{"name":"include/vex.h","type":"File","specialType":""},{"name":"makefile","type":"File","specialType":""},{"name":"src/main.cpp","type":"File","specialType":""},{"name":"src/robot-config.cpp","type":"File","specialType":"device_config"},{"name":"vex/mkenv.mk","type":"File","specialType":""},{"name":"vex/mkrules.mk","type":"File","specialType":""},{"name":"include","type":"Directory"},{"name":"src","type":"Directory"},{"name":"vex","type":"Directory"}],"device":{"slot":2,"uid":"276-4810","options":{}},"isExpertMode":false,"isExpertModeRC":false,"isVexFileImport":false,"robotconfig":[{"port":[6],"name":"Vision6","customName":false,"deviceType":"Vision","setting":{"config":"{\"config\":{\"brightness\":50,\"signatures\":[{\"name\":\"BLUEBALL\",\"parameters\":{\"uMin\":-3979,\"uMax\":-2571,\"uMean\":-3275,\"vMin\":11993,\"vMax\":13201,\"vMean\":12597,\"rgb\":1,\"type\":0,\"name\":\"BLUEBALL\"},\"range\":3.8},{\"name\":\"GREENBOX\",\"parameters\":{\"uMin\":-4955,\"uMax\":-4581,\"uMean\":-4768,\"vMin\":-5123,\"vMax\":-4523,\"vMean\":-4823,\"rgb\":1,\"type\":0,\"name\":\"GREENBOX\"},\"range\":3},{\"name\":\"REDBALL\",\"parameters\":{\"uMin\":9579,\"uMax\":11979,\"uMean\":10779,\"vMin\":-385,\"vMax\":319,\"vMean\":-33,\"rgb\":1,\"type\":0,\"name\":\"REDBALL\"},\"range\":1.1},{\"name\":\"REDUPBALL\",\"parameters\":{\"uMin\":0,\"uMax\":0,\"uMean\":0,\"vMin\":0,\"vMax\":0,\"vMean\":0,\"rgb\":0,\"type\":0,\"name\":\"REDUPBALL\"},\"range\":1.1},{\"name\":\"BLUEUPBALL\",\"parameters\":{\"uMin\":0,\"uMax\":0,\"uMean\":0,\"vMin\":0,\"vMax\":0,\"vMean\":0,\"rgb\":0,\"type\":0,\"name\":\"BLUEUPBALL\"},\"range\":3},{\"name\":\"SIG_6\",\"parameters\":{\"uMin\":0,\"uMax\":0,\"uMean\":0,\"vMin\":0,\"vMax\":0,\"vMean\":0,\"rgb\":0,\"type\":0,\"name\":\"SIG_6\"},\"range\":2.5},{\"name\":\"SIG_7\",\"parameters\":{\"uMin\":0,\"uMax\":0,\"uMean\":0,\"vMin\":0,\"vMax\":0,\"vMean\":0,\"rgb\":0,\"type\":0,\"name\":\"SIG_7\"},\"range\":2.5}],\"codes\":[]}}","isConfigured":"false"}},{"port":[18],"name":"motorcolor","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1"}}],"neverUpdate":null}
+#include "vex.h"
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Vision6              vision        6               
+// motorcolor           motor         18              
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+
+using namespace vex;
+
+
+event checkRed = event();
+event checkBlue = event();
+event checkGreen = event();
+event checkRedup = event();
+event checkBlueup = event ();
+
+
+void hasBlueCallback() {
+  Brain.Screen.setFont(mono20);
+  Brain.Screen.clearLine(1, black);
+  Brain.Screen.setCursor(Brain.Screen.row(), 1);
+  Brain.Screen.setCursor(1, 1);
+  Vision6.takeSnapshot(Vision6__BLUEBALL);
+  if (Vision6.objectCount > 0) {
+    Brain.Screen.print("Blue Object Found");
+
+    motorcolor.spin(forward);
+
+  } else {
+    Brain.Screen.print("No Blue Object");
+  }
+}
+
+void hasRedCallback() {
+  Brain.Screen.setFont(mono20);
+  Brain.Screen.clearLine(3, black);
+  Brain.Screen.setCursor(Brain.Screen.row(), 1);
+  Brain.Screen.setCursor(3, 1);
+  Vision6.takeSnapshot(Vision6__REDBALL);
+  if (Vision6.objectCount > 0) {
+    Brain.Screen.print("Red Object Found");
+    motorcolor.spin(reverse);
+
+  } else {
+    Brain.Screen.print("No Red Object");
+  }
+}
+
+void hasGreenCallback() {
+  Brain.Screen.setFont(mono20);
+  Brain.Screen.clearLine(5, black);
+  Brain.Screen.setCursor(5,1);
+  Brain.Screen.setCursor(Brain.Screen.row(), 1);
+  Vision6.takeSnapshot(Vision6__GREENBOX);
+  if (Vision6.objectCount > 0) {
+    Brain.Screen.print("Green Object Found");
+  } else {
+    Brain.Screen.print("No Green Object");
+  }
+}
+
+ void hasRedupCallback() {
+   Brain.Screen.setFont (mono20);
+   Brain.Screen.clearLine(7, black);
+   Brain.Screen.setCursor(7,1);
+   Brain.Screen.setCursor(Brain.Screen.row(),1);
+   Vision6.takeSnapshot(Vision6__REDUPBALL);
+   if (Vision6.objectCount>0) {
+     Brain.Screen.print("Red up object found");
+   } else {
+     Brain.Screen.print("No Red Up object found");
+   }
+ }
+
+void hasBlueupCallback(){
+ Brain.Screen.setFont(mono20);
+ Brain.Screen.clearLine(9,black);
+ Brain.Screen.setCursor(9,1);
+ Brain.Screen.setCursor(Brain.Screen.row(),1);
+ Vision6.takeSnapshot(Vision6__BLUEUPBALL);
+   if (Vision6.objectCount>0) {
+    Brain.Screen.print("Blue up object found");
+  } else {
+     Brain.Screen.print("No Blue Up object found");
+  }
+}
+
+
+int main() {
+  vexcodeInit();
+  checkBlue(hasBlueCallback);
+  checkRed(hasRedCallback);
+  checkGreen(hasGreenCallback);
+  checkRedup(hasRedupCallback);
+  checkBlueup(hasBlueupCallback);
+   while (true) {
+    checkBlue.broadcastAndWait();
+    checkRed.broadcastAndWait();
+    checkGreen.broadcastAndWait();
+    checkRedup.broadcastAndWait();
+    checkBlueup.broadcastAndWait(); 
+    wait(0.2, seconds);
+  }
+  }
+
