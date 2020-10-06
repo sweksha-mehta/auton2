@@ -1,1 +1,127 @@
-{"title":"auton","description":"Empty V5 C++ Project","icon":"USER921x.bmp","version":"20.06.2618","sdk":"20200618_17_00_00","language":"cpp","competition":false,"files":[{"name":"include/robot-config.h","type":"File","specialType":"device_config"},{"name":"include/vex.h","type":"File","specialType":""},{"name":"makefile","type":"File","specialType":""},{"name":"src/main.cpp","type":"File","specialType":""},{"name":"src/robot-config.cpp","type":"File","specialType":"device_config"},{"name":"vex/mkenv.mk","type":"File","specialType":""},{"name":"vex/mkrules.mk","type":"File","specialType":""},{"name":"include","type":"Directory"},{"name":"src","type":"Directory"},{"name":"vex","type":"Directory"}],"device":{"slot":2,"uid":"276-4810","options":{}},"isExpertMode":false,"isExpertModeRC":false,"isVexFileImport":false,"robotconfig":[{"port":[1],"name":"leftfront","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1"}},{"port":[2],"name":"rightfront","customName":true,"deviceType":"Motor","setting":{"reversed":"true","fwd":"forward","rev":"reverse","gear":"ratio18_1"}},{"port":[3],"name":"leftback","customName":true,"deviceType":"Motor","setting":{"reversed":"false","fwd":"forward","rev":"reverse","gear":"ratio18_1"}},{"port":[4],"name":"rightback","customName":true,"deviceType":"Motor","setting":{"reversed":"true","fwd":"forward","rev":"reverse","gear":"ratio18_1"}}],"neverUpdate":null}
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       victoriang                                                */
+/*    Created:      Wed Aug 19 2020                                           */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// leftfront            motor         1               
+// rightfront           motor         2               
+// leftback             motor         3               
+// rightback            motor         4               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+//
+
+void forwardback(int distance){
+//forward back
+leftfront.setVelocity(70, vex::velocityUnits::pct);
+leftback.setVelocity(70, vex::velocityUnits::pct);
+rightfront.setVelocity(70, vex::velocityUnits::pct);
+rightback.setVelocity(70, vex::velocityUnits::pct);
+
+leftfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+leftback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,true);
+
+leftfront.stop();
+leftback.stop();
+rightfront.stop();
+rightback.stop();
+
+vex::task::sleep(1000);
+}
+void leftright(int distance){
+//left/right
+leftfront.setVelocity(70, vex::velocityUnits::pct);
+leftback.setVelocity(70, vex::velocityUnits::pct);
+rightfront.setVelocity(70, vex::velocityUnits::pct);
+rightback.setVelocity(70, vex::velocityUnits::pct);
+
+leftfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+leftback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,true);
+
+leftfront.stop();
+leftback.stop();
+rightfront.stop();
+rightback.stop();
+
+vex::task::sleep(1000);
+}
+
+void turn(int distance){
+//turning
+leftfront.setVelocity(70, vex::velocityUnits::pct);
+leftback.setVelocity(70, vex::velocityUnits::pct);
+rightfront.setVelocity(70, vex::velocityUnits::pct);
+rightback.setVelocity(70, vex::velocityUnits::pct);
+
+leftfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+leftback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightfront.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,false);
+rightback.rotateFor(vex::directionType::fwd,distance,vex::rotationUnits::rev,true);
+
+leftfront.stop();
+leftback.stop();
+rightfront.stop();
+rightback.stop();
+
+vex::task::sleep(1000);
+}
+
+void pid (double targetPosition)
+{
+  double kP = .5;
+  double speed = 0;
+  double error = 0;
+  double lasterror = targetPosition - arm.position(degrees);
+  double before = targetPosition * .6;
+
+  arm.setStopping(hold);
+
+  while (true){
+    error = targetPosition - arm.position(degrees);//proportional
+
+    integral = integral + error; //extra push concept
+
+    derivative = error - lasterror; //pattern
+
+    speed = (error * kP) + (integral * kI) + (derivative * kD);
+    
+    if (fabs(arm.velocity(rpm)) < 2 && fabs(error) < 2){
+      kP = 0;
+      kI = 0;
+      kD = 0;
+      arm.stop();
+      return;
+    }
+
+    lasterror = error;
+
+    if (arm.position(degrees)>targetPosition) integral = 0;
+
+    if (arm.position(degrees)<before) integral = 0;
+  
+  arm.setVelocity(speed,rpm);
+  arm.spin(forward);
+
+  this_thread::sleep_for(15);
+}
+}
+
+int main() {
+  vexcodeInit();
+  forwardback(16);
+}
